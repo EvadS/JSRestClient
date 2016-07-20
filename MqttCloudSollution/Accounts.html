@@ -1,0 +1,76 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Accounts</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="Content/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body>
+    <section>
+        <script src="Scripts/jquery-2.2.4.min.js"></script>
+        <script src="Content/bootstrap/js/bootstrap.js"></script>
+        <script src="Scripts/jquery.validate.min.js"></script>
+        <script src="Scripts/MqttCloud/Admin/config.js"></script>
+        <script src="Scripts/MqttCloud/Crypto/2.5.3-crypto-md5.js"></script>
+        <script src="Scripts/MqttCloud/Crypto/createMd5.js"></script>
+        <script src="Scripts/MqttCloud/globalFunction.js"></script>
+        <script src="Scripts/MqttCloud/globalVariable.js"></script>
+        <script src="Scripts/MqttCloud/Admin/variables.js"></script>
+        <script src="Scripts/MqttCloud/Admin/functions.js"></script>
+        <script src="Scripts/MqttCloud/sessionProcessing.js"></script>
+        <script src="Scripts/MqttCloud/errorProcessing.js"></script>
+    </section>
+    <div class="container">
+        <section id="container">
+            <!--header content start-->
+            <section>
+                <div class="row">
+                    <button type="button" id="btnLogOut" class="btn btn-default">logout</button>
+                </div>
+                <div class="row">
+                    <button type="button" class="btn btn-info btn-lg" id="myBtn">Open Modal</button>
+                </div>
+            </section>
+            <!--header content end-->
+            <!--main content start-->
+            <section id="main-content">
+            </section>
+            <div id="modalContent">
+            </div>
+
+            <section>
+            </section>
+        </section>
+    </div>
+    <section>
+        <script>
+            $(document).ready(function () {
+
+                //bind event handlers
+                $('#btnLogOut').click(function () {
+                    logOut(userType.ADMINS, ADMIN_LOGOUT_RELATIVE_URL, function (xhr, ajaxOptions, thrownError) {
+
+                    });
+                });
+
+
+                $("#myBtn").click(function () {
+                    $("#modalDialog").modal();
+                });
+
+
+                $("#myBtn").click(function () {
+                    showInfo('Error', "some message22222", "modalContent");
+                });
+
+            });
+
+
+           
+
+
+        </script>
+    </section>
+</body>
+</html>
