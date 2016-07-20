@@ -24,6 +24,7 @@ function logOut(userTypeItem, relativeURL, callBackError) {
         data: JSON.stringify(requestData),
         contentType: "application/json",
         success: function (data) {
+            alert('true');
             forcedTerminationSession(userTypeItem);
         },
         error: function (xhr, ajaxOptions, thrownError) {

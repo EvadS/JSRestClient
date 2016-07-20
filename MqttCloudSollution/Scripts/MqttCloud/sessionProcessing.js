@@ -66,7 +66,7 @@ function getUserNameFromStorage(userTypeItem) {
     }
 
     var usersData = JSON.parse(storageData);
-    return usersData.email;
+    return usersData.name;
 }
 
 function createUserDataForRequest(userTypeItem) {
@@ -102,7 +102,7 @@ function checkAuthorise(userTypeItem) {
     return false;
 }
 
-function isAuthorise(userTypeItem) {
+function checkIsUserAuthenticated(userTypeItem) {
 
     if (!checkAuthorise()) {
 

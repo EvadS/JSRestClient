@@ -8,19 +8,19 @@
 
 
 function loginAdmins(userName_, userPass_, loginUrl, startupPage, processingErrorStatus, processingRequestError) {
-    var passwordHash = getUpperMd5(userPass_);
+    var passwordHash = getMd5(userPass_);
 
     // TODO: for test 
     var requestLoginData = {
         username: userName_,
-        md5: '31323334'//passwordHash
+        md5: passwordHash
     }
 
     var loginUrl = createFullUrl(loginUrl);
 
     var status = "";
     var message = "";
-
+    var session = "";
    
     $.ajax({
         url: loginUrl,
@@ -31,12 +31,13 @@ function loginAdmins(userName_, userPass_, loginUrl, startupPage, processingErro
 
             status = data.status;
             message = data.message;
+            session = data.data;            
 
             if (status == "SUCCESS") {
 
                 var userData = {
                     name: userName_,
-                    sessionId: message
+                    sessionId: session
                 }
 
                 localStorage.setItem(AUTHORIZATION_DATA_KEY, JSON.stringify(userData));
