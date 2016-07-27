@@ -11,12 +11,12 @@
 // function terminates session of the user.
 // relocated to the login page by current mode 
 function forcedTerminationSession(userTypeItem) {
+    var loginPage = getLoginPageByUserType(userTypeItem);
 
     localStorage.clear();
-    var loginPage = getLoginPageByUserType(userTypeItem);
     window.location = loginPage;
 
-    return;
+    return false;
 }
 
 function getLoginPageByUserType(userTypeItem) {
@@ -93,7 +93,7 @@ function checkAuthorise(userTypeItem) {
         return false;
     }
 
-    var sessionId = getSessionID();
+    var sessionId = getSessionIdFromStorage(userTypeItem);
 
     if (sessionId != null) {
         return true;

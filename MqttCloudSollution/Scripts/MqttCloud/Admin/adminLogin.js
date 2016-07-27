@@ -13,7 +13,7 @@ function loginAdmins(userName_, userPass_, loginUrl, startupPage, processingErro
     // TODO: for test 
     var requestLoginData = {
         username: userName_,
-        md5: passwordHash
+        md5: userPass_//passwordHash
     }
 
     var loginUrl = createFullUrl(loginUrl);

@@ -13,12 +13,13 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>MqttCloudSollution</RootNamespace>
     <AssemblyName>MqttCloudSollution</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -74,6 +75,7 @@
     <Content Include="Scripts\MqttCloud\Admin\classes\AdminsManagmentServiceJs.js" />
     <Content Include="Scripts\MqttCloud\Admin\adminLogin.js" />
     <Content Include="Scripts\MqttCloud\Admin\classes\entityCountsManagment.js" />
+    <Content Include="Scripts\MqttCloud\Admin\classes\navigationKeysBuilder.js" />
     <Content Include="Scripts\MqttCloud\Admin\classes\nodesManagment.js" />
     <Content Include="Scripts\MqttCloud\Admin\config.js" />
     <Content Include="Scripts\MqttCloud\Admin\functions.js" />

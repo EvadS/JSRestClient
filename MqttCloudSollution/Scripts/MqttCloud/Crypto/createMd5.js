@@ -14,3 +14,5 @@ function getUpperMd5(str) {
     var result = Crypto.MD5(str);
     return result.toUpperCase();
 }
+
+
