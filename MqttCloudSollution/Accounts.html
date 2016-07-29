@@ -11,33 +11,87 @@
         <script src="Scripts/jquery-2.2.4.min.js"></script>
         <script src="Content/bootstrap/js/bootstrap.js"></script>
         <script src="Scripts/jquery.validate.min.js"></script>
-        <script src="Scripts/MqttCloud/Admin/config.js"></script>
 
         <script src="Scripts/MqttCloud/Crypto/2.5.3-crypto-md5.js"></script>
         <script src="Scripts/MqttCloud/Crypto/createMd5.js"></script>
-
-        <script src="Scripts/MqttCloud/globalFunction.js"></script>
         <script src="Scripts/MqttCloud/globalVariable.js"></script>
-        <script src="Scripts/MqttCloud/Admin/variables.js"></script>
         <script src="Scripts/MqttCloud/Admin/functions.js"></script>
         <script src="Scripts/MqttCloud/sessionProcessing.js"></script>
         <script src="Scripts/MqttCloud/errorProcessing.js"></script>
 
         <script src="Scripts/MqttCloud/Admin/classes/navigationKeysBuilder.js"></script>
-        <script src="Scripts/MqttCloud/Admin/classes/AdminsManagmentServiceJs.js"></script>
+        <script src="Scripts/MqttCloud/Admin/classes/AccountsManagment.js"></script>
 
     </section>
+    <style>
+        .voffset1 {
+            margin-top: 5px;
+        }
+
+        .error {
+            color: red;
+            font-size: 12px;
+            margin-top: 5px;
+            margin-bottom: 0;
+        }
+
+        .inputTxtError {
+            border: 1px solid #ff0000;
+            color: #0e0e0e;
+        }
+
+        .row-height-70 {
+            height: 70px;
+            margin-top: 20px;
+        }
+    </style>
+
     <div class="container">
         <section id="container">
+
+
             <!--header content start-->
-            <section>
-                <div class="row pull-right">
-                    <button type="button" id="btnLogOut" class="btn btn-default">logout</button>
-                    <button type="button" class="btn btn-default" id="btnAddRecord" data-toggle="modal" data-target="#editItemsBlock">Open Modal</button>
+            <div class="row col-md-12">
+                <section>
+                    <div class="row pull-right">
+                        <button type="button" id="btnLogOut" class="btn btn-default">logout</button>
+                        <button type="button" class="btn btn-default" id="btnAddRecord" data-toggle="modal" data-target="#editItemsBlock">Open Modal</button>
+                    </div>
+                </section>
+            </div>
+
+            <br />
 
 
+            <div class="row row-height-70">
+                <!-- container section start -->
+                <div class="pull-right">
+                    <form class="form-inline" role="form" id="searchForm">
+
+
+
+                        <div class="form-group">
+                            <label for="emailForSearch" class="control-label">Email address:</label>
+                            <input type="email" class="form-control" id="emailForSearch" name="emailForSearch">
+                        </div>
+                        <div class="form-group">
+                            <button type="button" class="btn btn-default form-control" id="btnFindByEmail">find</button>
+
+                        </div>
+
+                        <div class="form-group">
+                            <label for="accountIdForSerch">Password:</label>
+                            <input class="form-control" id="accountIdForSerch" name="accountIdForSerch">
+                        </div>
+                        <div class="form-group">
+                            <button type="button" class="btn btn-default form-control" id="btnFindByAccountId">find</button>
+                        </div>
+                    </form>
                 </div>
-            </section>
+            </div>
+
+
+
             <div id="editItemsBlock" class="modal fade">
                 <div class="modal-dialog modal-lg">
                     <div class="modal-content">
@@ -48,10 +102,11 @@
 
                         <div class="modal-body">
 
-                            <form class="form-validate" id="editModalForm" role="form">
+                            <form class="form-validate" id="editModalForm" role="form" autocomplete="off">
                                 <div class="row col-md-12">
                                     <div class="form-group col-md-6">
                                         <label for="userName">User Name<span class="required">*</span></label>
+                                        <input type="text" style="display: none" />
                                         <input class="form-control input-sm m-bot15" id="userName" name="userName" autocomplete="off" />
                                     </div>
                                 </div>
@@ -60,6 +115,7 @@
                                     <div class="form-group col-md-6">
                                         <label for="password">Password <span class="required">*</span></label>
                                         <div>
+                                            <input style="display: none">
                                             <input class="form-control" id="password" name="password" type="password" autocomplete="off" />
                                         </div>
                                     </div>
@@ -67,6 +123,7 @@
                                     <div class="form-group col-md-6">
                                         <label for="confirm_password">Confirm Password <span class="required">*</span></label>
                                         <div>
+                                            <input style="display: none">
                                             <input class="form-control" id="confirm_password" name="confirm_password" type="password" autocomplete="off" />
                                         </div>
                                     </div>
@@ -93,6 +150,8 @@
                             <tr>
                                 <th>User Name</th>
                                 <th>Last Ip Address </th>
+                                <th></th>
+                                <th></th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -146,35 +205,31 @@
     </div>
     <section>
         <script>
-            var adminService = new AdminsManagmentServiceJs(baseurl);
-            var navKeyBuilder = new AdminsNavKeyBuilder(['username']);
+            var accountManager = new AccountsManagment(SERVER_URL);
+            var navKeyBuilder = new NavigationKeysBuilder(['email']);
 
             var currentPageGlobalVar = {
                 modalParentContainer: "modalContent",
                 userType: userType.ADMINS,
                 userName: getUserNameFromStorage(userType.ADMINS),
                 sessionID: getSessionIdFromStorage(userType.ADMINS),
-                currentPage: 0,
+                currentPage: 1,
                 currentRowNumOnPage: 0,
                 lastKey: null,
-                prevKey: null
+                prevKey: null,
+                direction: directionNavigation.NEXT,
+                isFirstsLoad: true
             };
 
             $(document).ready(function () {
                 checkIsUserAuthenticated(currentPageGlobalVar.userType);
 
                 $('#btnLogOut').click(function () {
-                    logOut(userType.ADMINS, ADMIN_LOGOUT_RELATIVE_URL, function (xhr, ajaxOptions, thrownError) {
-                        processingAjaxConnectionError(xhr, thrownError, currentPageGlobalVar.modalParentContainer, currentPageGlobalVar.userType);
-                    });
-                });
 
-
-
-                $("#btnAddRecord").click(function () {
-                    setModalEditTitle('Add new admin');
-                    $("#userName").prop('disabled', false);
-                    initValidate(true);
+                    logOut(userType.ADMINS
+                        , function (xhr, ajaxOptions, thrownError) {
+                            processingAjaxConnectionError(xhr, thrownError, currentPageGlobalVar.modalParentContainer, currentPageGlobalVar.userType);
+                        });
                 });
 
                 $('.page-link-next').click(function (e) {
@@ -189,48 +244,83 @@
 
                 });
 
+                $('#btnFindByEmail').click(function (e) {
+                    initlValidationOnSearchForm(true, false);
+
+                    var email = $("#emailForSearch").val();
+
+                    // create request 
+                    // call
+
+                    var searchForm = $("#searchForm");
+                    if (!searchForm.valid()) {
+                        return false;
+                    }
+
+                    alert('find by email');
+                });
+
+                $("#btnFindByAccountId").click(function () {
+
+                    initlValidationOnSearchForm(false, true);
+
+                    var searchForm = $("#searchForm");
+                    if (!searchForm.valid()) {
+                        return false;
+                    }
+
+                    alert('find by Account id ');
+                });
+            
                 $('.pagination-current-page').click(function (e) {
                     e.preventDefault();
                 });
 
-                $('#tblBodyItems').on('click', '.btn-tbl-delete', function (e) {
-                   
-                    var $row = jQuery(this).closest("tr");
-                    var userNameInRow = $row.find(".user-name").text();
-
-                    var confirmationstring =  "Are you sure you would like to delete administrator " + userNameInRow + "?";
-                    deleteConfirmation(remove, userNameInRow, confirmationstring);
-                    
-                });
-
-                $('#tblBodyItems').on('click', '.btn-tbl-edit', function (e) {
-
-                    var $row = jQuery(this).closest("tr");
-                    var userNameInRow = $row.find(".user-name").text();
-
-                    bindEditForm(userNameInRow);
-                });
-
-
-                $('#btnSet').click(function (e) {
-                    if (!validate()) {
-                        return false;
-                    }
-
-                    var newUserName = $('#userName').val();
-                    var newUserPass = $('#password').val();
-
-                    set(currentPageGlobalVar.userName, currentPageGlobalVar.sessionID, newUserName, newUserPass);
-                });
-
-
                 changeVisiblePrevLink();
-                list(currentPageGlobalVar.userName, currentPageGlobalVar.sessionID, false, false, ADMIN_PAGE_SIZE, null, null);
+
+                list(currentPageGlobalVar.userName, currentPageGlobalVar.sessionID, false, false, ACCOUNT_PAGE_SIZE, null, null);
 
             });
 
+            function initlValidationOnSearchForm(isEmailRequired, isAccountIdRequired) {
+
+                $("#searchForm").removeData('validator');
+
+                var validator = $("#searchForm").validate({
+                    rules: {
+                        accountIdForSerch: {
+                            required: isAccountIdRequired,
+                        },
+                        emailForSearch: {
+                            required: true,
+                            email: isEmailRequired
+                        }
+                    },
+                    errorElement: "em",
+                    errorPlacement: function (error, element) {
+                        // Add the `help-block` class to the error element
+                        error.addClass("help-block");
+
+                        if (element.prop("type") === "checkbox") {
+                            error.insertAfter(element.parent("label"));
+                        } else {
+                            error.insertAfter(element);
+                        }
+                    },
+                    highlight: function (element, errorClass, validClass) {
+                        // $(element).parents(".col-sm-5").addClass("has-error").removeClass("has-success");
+                        $(element).closest('.form-group').addClass('has-error');
+                    },
+                    unhighlight: function (element, errorClass, validClass) {
+                        $(element).parents(".col-sm-5").addClass("has-success").removeClass("has-error");
+                    }
+                });
+
+                validator.resetForm();
+            }
+
             function setModalEditTitle(title) {
- 
+
                 $(".modal-header .modal-edit-title").text(title);
             }
 
@@ -246,20 +336,26 @@
 
 
             function getNextRows() {
-                list(currentPageGlobalVar.userName, currentPageGlobalVar.sessionID, false, false, ADMIN_PAGE_SIZE, currentPageGlobalVar.lastKey);
-                currentPageGlobalVar.currentPage++;
+                currentPageGlobalVar.direction = directionNavigation.NEXT;
+                list(currentPageGlobalVar.userName, currentPageGlobalVar.sessionID, false, false, ACCOUNT_PAGE_SIZE, currentPageGlobalVar.lastKey);
             }
 
             function getPrevRows() {
-                list(currentPageGlobalVar.userName, currentPageGlobalVar.sessionID, true, false, ADMIN_PAGE_SIZE, currentPageGlobalVar.prevKey);
-                currentPageGlobalVar.currentPage--;
+                currentPageGlobalVar.direction = directionNavigation.PREV;
+                list(currentPageGlobalVar.userName, currentPageGlobalVar.sessionID, true, false, ACCOUNT_PAGE_SIZE, currentPageGlobalVar.prevKey);
+
             }
 
             function list(usertNameItem, sessionIdItem, isReverseItem, includePrevKey, pagesizeItem, fkey) {
 
+                if (!fkey) {
+                    currentPageGlobalVar.isFirstsLoad = true;
+                    currentPageGlobalVar.currentPage = 1;
+                }
+
                 var listRequestData = createListRequestObject(usertNameItem, sessionIdItem, isReverseItem, includePrevKey, pagesizeItem, fkey, null);
 
-                adminService.list(listRequestData, ADMIN_LIST_RELATIVE_URL, isReverseItem
+                accountManager.list(listRequestData, isReverseItem
                                 , writeDataToTable
                                 , function (message) {
                                     showError("Error", message, currentPageGlobalVar.modalParentContainer, currentPageGlobalVar.userType);
@@ -312,7 +408,7 @@
             }
 
             function changeVisiblePrevLink() {
-                if (currentPageGlobalVar.currentPage > 0) {
+                if (currentPageGlobalVar.currentPage > 1) {
                     $(".page-link-prev").css('visibility', 'visible');
                 }
                 else {
@@ -320,8 +416,13 @@
                 }
             }
 
+            function replaceTableData(tableData) {
+                $('.items-table-body').children('tr').remove();
+                $('.items-table-body').append(tableData);
+            }
+
             function changeVisibleNextLink() {
-                if (currentPageGlobalVar.currentRowNumOnPage != ADMIN_PAGE_SIZE) {
+                if (currentPageGlobalVar.currentRowNumOnPage != ACCOUNT_PAGE_SIZE) {
                     $(".page-link-next").css('visibility', 'hidden');
                 }
                 else {
@@ -330,62 +431,83 @@
             }
 
 
-            function writeDataToTable(responseText) {
+            function writeDataToTable(responseText, direction) {
                 $("#footerTable").html("");
 
-                var htmlBody = createTableBodyAndKeys(responseText);
+                if (responseText.length > 0) {
+                    var htmlBody = createTableBodyAndKeys(responseText, direction);
 
-                if (htmlBody != null) {
-                    $('.items-table-body').children('tr').remove();
-                    $('.items-table-body').append(htmlBody);
+                    if (htmlBody != null) {
+
+                        replaceTableData(htmlBody);
+
+                        if (!currentPageGlobalVar.isFirstsLoad) {
+                            if (currentPageGlobalVar.direction == directionNavigation.NEXT) {
+                                currentPageGlobalVar.currentPage++;
+                            }
+                            else if (currentPageGlobalVar.direction == directionNavigation.PREV) {
+                                currentPageGlobalVar.currentPage--;
+                            }
+                        }
+
+                        changeVisiblePrevLink();
+                        changeVisibleNextLink();
+
+                        $('.pagination-current-page').text(currentPageGlobalVar.currentPage);
+                        currentPageGlobalVar.isFirstsLoad = false;
+                    }
+                }
+                else {
 
                     changeVisiblePrevLink();
                     changeVisibleNextLink();
-                }
-                else {
-                    $(".page-link-next").css('visibility', 'hidden');
 
-                    if (currentPageGlobalVar.currentPage < 1) {
-                        $("#footerTable").append(EMPTY_TABLE_ON_PAGE_MESSAGE);
+                    if (currentPageGlobalVar.isFirstsLoad) {
+                        $("#footerTable").append(EMPTY_TABLE_DATA_MESSAGE);
+                        return false;
+                    }
+
+                    else {
+                        $(".page-link-next").css('visibility', 'hidden');
+                        showInfo("Info", EMPTY_NEXT_PAGE_MESSAGE, currentPageGlobalVar.modalParentContainer, currentPageGlobalVar.adminUserType);
+
+                        return false;
                     }
                 }
             }
 
-            function createTableBodyAndKeys(responseText) {
+            function createTableBodyAndKeys(responseText, direction) {
 
-                var res = null;
-                if (responseText.length > 0) {
-
-                    $('.pagination-current-page').text(currentPageGlobalVar.currentPage + 1);
-
-                    currentPageGlobalVar.lastKey = navKeyBuilder.buildLastKey(responseText);
-                    currentPageGlobalVar.prevKey = navKeyBuilder.buildFirstKey(responseText);
-                }
-                else {
-
-                    currentPageGlobalVar.currentPage = parseInt($('.pagination-current-page').text() - 1);
-                    if (currentPageGlobalVar.currentPage >= 1) {
-                        showInfo("Info", EMPTY_NEXT_PAGE_MESSAGE, currentPageGlobalVar.modalParentContainer, currentPageGlobalVar.adminUserType);
-                    }
-
-                    return;
-                }
+                var res = "";
 
                 currentPageGlobalVar.currentRowNumOnPage = 0;
 
+                currentPageGlobalVar.lastKey = navKeyBuilder.buildLastKey(responseText);
+                currentPageGlobalVar.prevKey = navKeyBuilder.buildFirstKey(responseText);
+
                 for (var i = 0; i < responseText.length; i++) {
 
-                    var username = responseText[i].username;
-                    var ipAddress = responseText[i].ipAddress ? responseText[i].ipAddress : "";
+                    var accountID = responseText[i].accountID;
+                    var email = responseText[i].email ? responseText[i].email : "";
+                    var contactName = responseText[i].contactName || "";
+                    var cardIdent = responseText[i].cardIdent || "";
 
                     res += '<tr>' +
-                               '<td class="user-name">' + username + '</td>' +
-                               '<td>' + ipAddress + '</td>' +
+                               '<td class="accountID">' + accountID + '</td>' +
+                               '<td class="email">' + email + '</td>' +
+                               '<td>' + contactName + '</td>' +
+                               '<td>' + cardIdent + '</td>' +
                                '<td>' +
-                                   '<button type="button" class="btn btn-primary  btn-sm btn-tbl-edit">Edit</button>' +
-                                   '<button type="button" class="btn btn-danger btn-sm btn-tbl-delete">Delete</button>' +
+                                   '<button type="button" class="btn btn-primary  btn-sm btn-tbl-update">Edit</button>' +
+                                '</td>' +
+                                '<td>' +
+                                    '<button type="button" class="btn  btn-sm btn-tbl-update-pass">Update Pass</button>' +
+                                '</td>' +
+                                '<td>' +
+                                   '<button type="button" class="btn  btn-sm btn-tbl-update-mqtt-pass">Update mqtt Pass</button>' +
                                '</td>' +
                             '</tr>';
+
                     currentPageGlobalVar.currentRowNumOnPage++;
                 }
 
@@ -423,7 +545,7 @@
                 initValidate(false);
                 $("#userName").val(editableUserName);
 
-                var titleRow = "Edit  record \"" + editableUserName+ "\"";
+                var titleRow = "Edit  record \"" + editableUserName + "\"";
                 setModalEditTitle(titleRow);
 
 
@@ -440,6 +562,9 @@
                                  , afterUpdate = function (e) {
                                      showInfo("Info", "changes have been made successfully", currentPageGlobalVar.modalParentContainer);
                                      $('#editItemsBlock').modal('hide');
+
+                                     list(currentUser, currentSession, false, false, ACCOUNT_PAGE_SIZE, null, null);
+
                                  }
                                  , function (message) {
                                      showError("Error", message, currentPageGlobalVar.modalParentContainer, currentPageGlobalVar.userType);
@@ -447,8 +572,6 @@
                                  , function (xhr, ajaxOptions, thrownError) {
                                      processingAjaxConnectionError(xhr, thrownError, currentPageGlobalVar.modalParentContainer, currentPageGlobalVar.userType);
                                  });
-
-
             }
 
             function deleteConfirmation(callback, removeUserName, message) {
@@ -459,14 +582,14 @@
                     });
 
                 $("#confirmation_ok_button").off("click");
-                $("#confirmation_ok_button").click(function () {                  
-                    eval("callback(\"" + removeUserName + "\")");
+                $("#confirmation_ok_button").click(function () {
+                    callback(removeUserName);
                 });
             }
 
 
             function remove(userNameItem) {
-           
+
                 var requestData = createDeleteRequestObject(currentPageGlobalVar.userName, currentPageGlobalVar.sessionID, userNameItem);
 
                 adminService.remove(requestData, ADMIN_DELETE_RELATIVE_URL
@@ -475,7 +598,7 @@
                                     showInfo("Info", "Chosen record have been deleted successfully", currentPageGlobalVar.modalParentContainer);
                                     $('#editItemsBlock').modal('hide');
                                     currentPageGlobalVar.currentPage = 0;
-                                    list(currentPageGlobalVar.userName, currentPageGlobalVar.sessionID, false, false, ADMIN_PAGE_SIZE, null, null);
+                                    list(currentPageGlobalVar.userName, currentPageGlobalVar.sessionID, false, false, ACCOUNT_PAGE_SIZE, null, null);
                                 }
                                 , function (message) {
                                     showError("Error", message, currentPageGlobalVar.modalParentContainer, currentPageGlobalVar.userType);

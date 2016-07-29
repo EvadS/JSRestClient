@@ -11,20 +11,19 @@
 
 
 //Terminates admin session
-function logOut(userTypeItem, relativeURL, callBackError) {
+function logOut(userTypeItem,  callBackError) {
 
     var requestData = createUserDataForRequest(userTypeItem);
 
     var loginPage = getLoginPageByUserType(userTypeItem);
-    var serviceUrl = createFullUrl(relativeURL);
+    var serviceUrl = SERVER_URL +  ADMIN_LOGOUT_RELATIVE_URL;
 
     $.ajax({
         url: serviceUrl,
         type: 'POST',
         data: JSON.stringify(requestData),
         contentType: "application/json",
-        success: function (data) {
-            alert('true');
+        success: function (data) {            
             forcedTerminationSession(userTypeItem);
         },
         error: function (xhr, ajaxOptions, thrownError) {

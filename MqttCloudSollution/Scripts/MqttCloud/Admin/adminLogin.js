@@ -6,8 +6,16 @@
 /// <reference path="../../Crypto/createMd5.js" />
 /// <reference path="../../jquery-2.2.4.min.js" />
 
-
-function loginAdmins(userName_, userPass_, loginUrl, startupPage, processingErrorStatus, processingRequestError) {
+/**
+ * 
+ * @param {type} userName_
+ * @param {type} userPass_
+ * @param {type} loginUrl
+ * @param {type} startupPage
+ * @param {type} callbackSuccesError
+ * @param {type} processingRequestError
+ */
+function loginAdmins(userName_, userPass_, loginUrl, startupPage, callbackSuccesError, callbackAjaxError) {
     var passwordHash = getMd5(userPass_);
 
     // TODO: for test 
@@ -16,7 +24,7 @@ function loginAdmins(userName_, userPass_, loginUrl, startupPage, processingErro
         md5: userPass_//passwordHash
     }
 
-    var loginUrl = createFullUrl(loginUrl);
+    var loginUrl = SERVER_URL + loginUrl;
 
     var status = "";
     var message = "";
@@ -45,11 +53,11 @@ function loginAdmins(userName_, userPass_, loginUrl, startupPage, processingErro
             }
             else if (status == "ERROR")
             {
-                processingErrorStatus(message);
+                callbackSuccesError(message);
             }
         },
         error: function (xhr, ajaxOptions, thrownError) {
-            processingRequestError(xhr);
+            callbackAjaxError(xhr);
         }
     });
 

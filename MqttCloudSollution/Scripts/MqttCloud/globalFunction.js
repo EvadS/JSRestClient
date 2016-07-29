@@ -1,9 +1,8 @@
 ﻿
-
 // combine full url for request 
 function createFullUrl(apiUrl) {
     if (apiUrl != null) {
-        var res = baseurl.concat(apiUrl);
+        var res = SERVER_URL.concat(apiUrl);
         return res;
     }
 

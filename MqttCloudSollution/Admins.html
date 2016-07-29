@@ -12,7 +12,6 @@
         <script src="Scripts/jquery-2.2.4.min.js"></script>
         <script src="Content/bootstrap/js/bootstrap.js"></script>
         <script src="Scripts/jquery.validate.min.js"></script>
-        <script src="Scripts/MqttCloud/Admin/config.js"></script>
 
         <script src="Scripts/MqttCloud/Crypto/2.5.3-crypto-md5.js"></script>
         <script src="Scripts/MqttCloud/Crypto/createMd5.js"></script>
@@ -23,10 +22,11 @@
         <script src="Scripts/MqttCloud/sessionProcessing.js"></script>
         <script src="Scripts/MqttCloud/errorProcessing.js"></script>
 
-        <script src="Scripts/MqttCloud/Admin/classes/navigationKeysBuilder.js"></script>
-        <script src="Scripts/MqttCloud/Admin/classes/AdminsManagmentServiceJs.js"></script>
+        <script src="Scripts/MqttCloud/Admin/classes/NavigationKeysBuilder.js"></script>
+        <script src="Scripts/MqttCloud/Admin/classes/AdminsManagment.js"></script>
 
     </section>
+
     <div class="container">
         <section id="container">
             <!--header content start-->
@@ -34,8 +34,6 @@
                 <div class="row pull-right">
                     <button type="button" id="btnLogOut" class="btn btn-default">logout</button>
                     <button type="button" class="btn btn-default" id="btnAddRecord" data-toggle="modal" data-target="#editItemsBlock">Open Modal</button>
-
-
                 </div>
             </section>
             <div id="editItemsBlock" class="modal fade">
@@ -48,11 +46,12 @@
 
                         <div class="modal-body">
 
-                            <form class="form-validate" id="editModalForm" role="form">
+                            <form class="form-validate" id="editModalForm" role="form" autocomplete="off">
                                 <div class="row col-md-12">
                                     <div class="form-group col-md-6">
                                         <label for="userName">User Name<span class="required">*</span></label>
-                                        <input class="form-control input-sm m-bot15" id="userName" name="userName" autocomplete="off" />
+                                        <input style="display: none">
+                                        <input class="form-control input-sm m-bot15 " id="userName" name="userName" />
                                     </div>
                                 </div>
 
@@ -60,14 +59,16 @@
                                     <div class="form-group col-md-6">
                                         <label for="password">Password <span class="required">*</span></label>
                                         <div>
-                                            <input class="form-control" id="password" name="password" type="password" autocomplete="off" />
+                                            <input style="display: none">
+                                            <input class="form-control" id="password" name="password" type="password" />
                                         </div>
                                     </div>
 
                                     <div class="form-group col-md-6">
                                         <label for="confirm_password">Confirm Password <span class="required">*</span></label>
                                         <div>
-                                            <input class="form-control" id="confirm_password" name="confirm_password" type="password" autocomplete="off" />
+                                            <input style="display: none">
+                                            <input class="form-control" id="confirm_password" name="confirm_password" type="password" />
                                         </div>
                                     </div>
                                 </div>
@@ -127,7 +128,7 @@
                 <div class="modal-dialog">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <button aria-hidden="true" class="close" data-dismiss="modal" server_url="" type="button">&times;</button>
                             <h4 class="modal-title">Confirmation</h4>
                         </div>
                         <div class="modal-body">
@@ -146,8 +147,8 @@
     </div>
     <section>
         <script>
-            var adminService = new AdminsManagmentServiceJs(baseurl);
-            var navKeyBuilder = new AdminsNavKeyBuilder(['username']);
+            var adminService = new AdminsManagment(SERVER_URL);
+            var navKeyBuilder = new NavigationKeysBuilder(['username']);
 
             var currentPageGlobalVar = {
                 modalParentContainer: "modalContent",
@@ -159,34 +160,36 @@
                 lastKey: null,
                 prevKey: null,
                 direction: directionNavigation.NEXT,
-                isFirstsLoad : true
+                isFirstsLoad: true
             };
 
             $(document).ready(function () {
+
+
                 checkIsUserAuthenticated(currentPageGlobalVar.userType);
 
                 $('#btnLogOut').click(function () {
-                    logOut(userType.ADMINS, ADMIN_LOGOUT_RELATIVE_URL, function (xhr, ajaxOptions, thrownError) {
-                        processingAjaxConnectionError(xhr, thrownError, currentPageGlobalVar.modalParentContainer, currentPageGlobalVar.userType);
-                    });
+                    logOut(userType.ADMINS
+                        , function (xhr, ajaxOptions, thrownError) {
+                            processingAjaxConnectionError(xhr, thrownError, currentPageGlobalVar.modalParentContainer, currentPageGlobalVar.userType);
+                        });
                 });
 
                 $("#btnAddRecord").click(function () {
                     setModalEditTitle('Add new admin');
                     $("#userName").prop('disabled', false);
+
                     initValidate(true);
                 });
 
                 $('.page-link-next').click(function (e) {
                     e.preventDefault();
                     getNextRows();
-
                 });
 
                 $('.page-link-prev').click(function (e) {
                     e.preventDefault();
                     getPrevRows();
-
                 });
 
                 $('.pagination-current-page').click(function (e) {
@@ -208,7 +211,7 @@
                     var $row = jQuery(this).closest("tr");
                     var userNameInRow = $row.find(".user-name").text();
 
-                    bindEditForm(userNameInRow);
+                    bindDataOnEditForm(userNameInRow);
                 });
 
 
@@ -223,14 +226,11 @@
                     set(currentPageGlobalVar.userName, currentPageGlobalVar.sessionID, newUserName, newUserPass);
                 });
 
-
                 changeVisiblePrevLink();
                 list(currentPageGlobalVar.userName, currentPageGlobalVar.sessionID, false, false, ADMIN_PAGE_SIZE, null, null);
-
             });
 
             function setModalEditTitle(title) {
-
                 $(".modal-header .modal-edit-title").text(title);
             }
 
@@ -253,7 +253,6 @@
             function getPrevRows() {
                 currentPageGlobalVar.direction = directionNavigation.PREV;
                 list(currentPageGlobalVar.userName, currentPageGlobalVar.sessionID, true, false, ADMIN_PAGE_SIZE, currentPageGlobalVar.prevKey);
-
             }
 
             function list(usertNameItem, sessionIdItem, isReverseItem, includePrevKey, pagesizeItem, fkey) {
@@ -265,7 +264,7 @@
 
                 var listRequestData = createListRequestObject(usertNameItem, sessionIdItem, isReverseItem, includePrevKey, pagesizeItem, fkey, null);
 
-                adminService.list(listRequestData, ADMIN_LIST_RELATIVE_URL, isReverseItem
+                adminService.list(listRequestData, isReverseItem
                                 , writeDataToTable
                                 , function (message) {
                                     showError("Error", message, currentPageGlobalVar.modalParentContainer, currentPageGlobalVar.userType);
@@ -274,7 +273,6 @@
                                     processingAjaxConnectionError(xhr, thrownError, currentPageGlobalVar.modalParentContainer, currentPageGlobalVar.userType);
                                 });
             }
-
 
             function createListRequestObject(userNameItem, sessionIdItem, isReverse, includePreviousKey, pageSizeItem, firstKeyItem, lastKeyItem) {
                 var result = {
@@ -369,19 +367,13 @@
                 }
                 else {
 
-                    changeVisiblePrevLink();
-                    changeVisibleNextLink();
-
                     if (currentPageGlobalVar.isFirstsLoad) {
                         $("#footerTable").append(EMPTY_TABLE_DATA_MESSAGE);
-                        return false;
                     }
 
                     else {
                         $(".page-link-next").css('visibility', 'hidden');
                         showInfo("Info", EMPTY_NEXT_PAGE_MESSAGE, currentPageGlobalVar.modalParentContainer, currentPageGlobalVar.adminUserType);
-
-                        return false;
                     }
                 }
             }
@@ -441,8 +433,8 @@
             }
 
 
-            function bindEditForm(editableUserName) {
-
+            function bindDataOnEditForm(editableUserName) {               
+                
                 initValidate(false);
                 $("#userName").val(editableUserName);
 
@@ -459,7 +451,7 @@
 
                 var requestData = createSetRequestObject(currentUser, currentSession, newUser, newPass);
 
-                adminService.set(requestData, ADMIN_SET_RELATIVE_URL
+                adminService.set(requestData
                                  , afterUpdate = function (e) {
                                      showInfo("Info", "changes have been made successfully", currentPageGlobalVar.modalParentContainer);
                                      $('#editItemsBlock').modal('hide');
@@ -473,8 +465,6 @@
                                  , function (xhr, ajaxOptions, thrownError) {
                                      processingAjaxConnectionError(xhr, thrownError, currentPageGlobalVar.modalParentContainer, currentPageGlobalVar.userType);
                                  });
-
-
             }
 
             function deleteConfirmation(callback, removeUserName, message) {
@@ -495,7 +485,7 @@
 
                 var requestData = createDeleteRequestObject(currentPageGlobalVar.userName, currentPageGlobalVar.sessionID, userNameItem);
 
-                adminService.remove(requestData, ADMIN_DELETE_RELATIVE_URL
+                adminService.remove(requestData
                                 , afterUpdate = function () {
 
                                     showInfo("Info", "Chosen record have been deleted successfully", currentPageGlobalVar.modalParentContainer);
@@ -510,9 +500,6 @@
                                     processingAjaxConnectionError(xhr, thrownError, currentPageGlobalVar.modalParentContainer, currentPageGlobalVar.userType);
                                 });
             }
-
-
-
         </script>
     </section>
 </body>

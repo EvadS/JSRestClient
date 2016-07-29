@@ -85,7 +85,11 @@ function createUserDataForRequest(userTypeItem) {
 
     return requestData;
 }
-
+/**
+ * 
+ * @param {type} userTypeItem
+ * @returns {type} 
+ */
 function checkAuthorise(userTypeItem) {
     var storageData = getCurrentSessionDataOfUser(userTypeItem);
 
@@ -102,6 +106,9 @@ function checkAuthorise(userTypeItem) {
     return false;
 }
 
+/** Проверка является ли пользователь авторизированным.
+* @param {String} тип пользователя 
+*/
 function checkIsUserAuthenticated(userTypeItem) {
 
     if (!checkAuthorise()) {

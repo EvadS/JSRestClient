@@ -1,8 +1,12 @@
-﻿/// <reference path="sessionProcessing.js" />
+﻿
+/// // errorProcessing.js
+/// functions for ajax request handling errors
+/// 
+/// <reference path="sessionProcessing.js" />
 /// <reference path="../../Content/bootstrap/js/bootstrap.js" />
 /// <reference path="globalVariable.js" />
 
-// errorProcessing.js
+
 
 
 function showError(headerText, messageText, parentPlaceHolderId,userTypeItem) {
